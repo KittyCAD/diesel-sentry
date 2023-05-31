@@ -7,7 +7,9 @@ license = "Apache-2.0"
 repository = "https://github.com/KittyCAD/api-deux.git"
 
 [dependencies]
+anyhow = "1.0.71"
 diesel = { version = "~2.0.4", features = [ "r2d2", "mysql", "i-implement-a-third-party-backend-and-opt-into-breaking-changes" ] }
+phonenumber = "0.3.2"
 sentry = { version = "0.31", default-features = false, features = ["anyhow", "backtrace", "panic", "contexts", "debug-images", "tracing", "log", "slog", "rustls", "reqwest"] }
 serde = "1"
 tracing = "0.1"

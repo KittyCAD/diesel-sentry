@@ -24,6 +24,8 @@ use diesel::{
 use sentry::Hub;
 use uuid::Uuid;
 
+pub mod phone_number;
+
 // https://dev.mysql.com/doc/refman/8.0/en/information-functions.html
 // db.name
 diesel::sql_function!(fn DATABASE() -> diesel::sql_types::Text);
