@@ -1,0 +1,14 @@
+[package]
+name = "diesel-sentry"
+version = "0.1.0"
+edition = "2021"
+authors = ["Jess Frazelle <jess@kittycad.io>"]
+license = "Apache-2.0"
+repository = "https://github.com/KittyCAD/api-deux.git"
+
+[dependencies]
+diesel = { version = "~2.0.4", features = [ "r2d2", "mysql", "i-implement-a-third-party-backend-and-opt-into-breaking-changes" ] }
+sentry = { version = "0.31", default-features = false, features = ["anyhow", "backtrace", "panic", "contexts", "debug-images", "tracing", "log", "slog", "rustls", "reqwest"] }
+serde = "1"
+tracing = "0.1"
+uuid = { version = "1", features = [ "v4", "serde" ] }
