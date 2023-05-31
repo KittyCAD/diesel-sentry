@@ -12,14 +12,15 @@ use std::{
 use diesel::{
     backend::Backend,
     connection::{
-        AnsiTransactionManager, ConnectionGatWorkaround, LoadConnection, LoadRowIter,
-        SimpleConnection, TransactionManager,
+        AnsiTransactionManager, ConnectionSealed, LoadConnection, SimpleConnection,
+        TransactionManager,
     },
     debug_query,
     expression::QueryMetadata,
     prelude::*,
     query_builder::{AsQuery, QueryFragment, QueryId},
     r2d2::R2D2Connection,
+    row::RowSealed,
 };
 use sentry::Hub;
 use uuid::Uuid;
@@ -79,12 +80,8 @@ impl<C: Connection> SimpleConnection for SentryConnection<C> {
     }
 }
 
-impl<'conn, 'query, C: Connection> ConnectionGatWorkaround<'conn, 'query, C::Backend>
-    for SentryConnection<C>
-{
-    type Cursor = <C as ConnectionGatWorkaround<'conn, 'query, C::Backend>>::Cursor;
-    type Row = <C as ConnectionGatWorkaround<'conn, 'query, C::Backend>>::Row;
-}
+impl<C: Connection> RowSealed for SentryConnection<C> {}
+impl<C: Connection> ConnectionSealed for SentryConnection<C> {}
 
 impl<C> LoadConnection for SentryConnection<C>
 where
@@ -93,6 +90,14 @@ where
     C::Backend: Default,
     <C::Backend as Backend>::QueryBuilder: Default,
 {
+    type Cursor<'conn, 'query> = C::Cursor<'conn, 'query>
+    where
+        Self: 'conn;
+
+    type Row<'conn, 'query> = C::Row<'conn, 'query>
+    where
+        Self: 'conn;
+
     #[tracing::instrument(
         fields(
             db.name=%self.info.current_database,
@@ -106,7 +111,7 @@ where
     fn load<'conn, 'query, T>(
         &'conn mut self,
         source: T,
-    ) -> QueryResult<LoadRowIter<'conn, 'query, Self, Self::Backend>>
+    ) -> Result<<C as LoadConnection>::Cursor<'conn, 'query>, diesel::result::Error>
     where
         T: AsQuery + QueryFragment<Self::Backend>,
         T::Query: QueryFragment<Self::Backend> + QueryId + 'query,

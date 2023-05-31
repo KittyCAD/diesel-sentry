@@ -2,7 +2,10 @@
 
 use std::str::FromStr;
 
-use diesel::{backend::RawValue, serialize::ToSql, sql_types::Text, AsExpression, FromSqlRow};
+use diesel::{
+    backend::RawValue, query_builder::bind_collector::RawBytesBindCollector, serialize::ToSql,
+    sql_types::Text, AsExpression, FromSqlRow,
+};
 
 /// A phone number.
 #[derive(Debug, Default, Clone, PartialEq, Hash, Eq, FromSqlRow, AsExpression)]
@@ -31,9 +34,7 @@ impl std::ops::Deref for PhoneNumber {
 
 impl<DB> ToSql<Text, DB> for PhoneNumber
 where
-    DB: diesel::backend::Backend<
-        BindCollector = diesel::query_builder::bind_collector::RawBytesBindCollector<DB>,
-    >,
+    DB: diesel::backend::Backend<BindCollector = RawBytesBindCollector<DB>>,
     String: diesel::serialize::ToSql<Text, DB>,
 {
     fn to_sql<'a>(
